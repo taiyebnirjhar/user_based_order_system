@@ -1,18 +1,23 @@
-import { Document } from "mongoose";
+import { Document, Model } from "mongoose";
 
+interface IUserFullName {
+  firstName: string;
+  lastName: string;
+}
 interface IAddress {
   street: string;
   city: string;
   country: string;
 }
 
-interface IUserFullName {
-  firstName: string;
-  lastName: string;
+interface IOrders {
+  productName: string;
+  price: number;
+  quantity: number;
 }
 
 interface IUser extends Document {
-  userId: string;
+  userId: number;
   username: string;
   password: string;
   fullName: IUserFullName;
@@ -21,8 +26,13 @@ interface IUser extends Document {
   isActive: boolean;
   hobbies: string[];
   address: IAddress;
+  orders?: IOrders[];
+}
+
+interface ExtendedUserModel extends Model<IUser> {
+  isUserExists(userId: number): Promise<IUser | null>;
 }
 
 export default IUser;
 
-export { IAddress, IUserFullName };
+export { ExtendedUserModel, IAddress, IUserFullName };

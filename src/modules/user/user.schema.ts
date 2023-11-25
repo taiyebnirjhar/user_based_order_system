@@ -1,8 +1,16 @@
 import { Schema } from "mongoose";
-import IUser, { IAddress, IUserFullName } from "./user.interface";
+import IUser, {
+  ExtendedUserModel,
+  IAddress,
+  IUserFullName,
+} from "./user.interface";
+import { UserModel } from "./user.model";
 
 const fullNameSchema = new Schema<IUserFullName>({
-  firstName: { type: String, required: true },
+  firstName: {
+    type: String,
+    required: true,
+  },
   lastName: { type: String, required: true },
 });
 
@@ -12,8 +20,8 @@ const addressSchema = new Schema<IAddress>({
   country: { type: String, required: true },
 });
 
-const userSchema = new Schema<IUser>({
-  userId: { type: String, required: true },
+const userSchema = new Schema<IUser, ExtendedUserModel>({
+  userId: { type: Number, required: true },
   username: { type: String, required: true },
   password: { type: String, required: true },
   fullName: fullNameSchema,
@@ -23,6 +31,11 @@ const userSchema = new Schema<IUser>({
   hobbies: [{ type: String }],
   address: addressSchema,
 });
+
+userSchema.statics.isUserExists = async function (userId: number) {
+  const existingUser = await UserModel.findOne({ userId });
+  return existingUser;
+};
 
 export default userSchema;
 

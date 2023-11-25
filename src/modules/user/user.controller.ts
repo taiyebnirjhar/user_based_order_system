@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { UserServices } from "./user.services";
+import { userIdValidationSchema } from "./user.validation";
 
 const createUser = async (req: Request, res: Response) => {
   try {
@@ -43,7 +44,11 @@ const getSingleUser = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
 
-    const result = await UserServices.getSingleUserDB(userId);
+    const numericUserId = Number(userId);
+
+    const validationZod = userIdValidationSchema.parse(numericUserId);
+
+    const result = await UserServices.getSingleUserDB(validationZod);
 
     res.status(200).json({
       success: true,
@@ -51,10 +56,10 @@ const getSingleUser = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (error) {
-    res.status(500).json({
+    res.status(400).json({
       success: false,
       message: "Error getting user",
-      error: error.message,
+      error: error.errors || error.message,
     });
   }
 };
