@@ -75,6 +75,7 @@ const userSchema = new Schema<IUser, ExtendedUserModel>({
 userSchema.pre("save", async function (next) {
   // eslint-disable-next-line @typescript-eslint/no-this-alias
   const user = this;
+  console.log(this);
   user.password = await bcrypt.hash(
     user.password,
     Number(config.bcrypt_salt_rounds),
@@ -84,9 +85,36 @@ userSchema.pre("save", async function (next) {
 
 userSchema.post("save", function (doc, next) {
   doc.password = "";
+  delete doc.password;
+
   next();
 });
 
+userSchema.pre("updateOne", async function (next) {
+  const updates = this.getUpdate();
+  const update = updates[0].$set;
+
+  const newPassword = update.password;
+
+  if (newPassword) {
+    update.password = await bcrypt.hash(
+      newPassword,
+      Number(config.bcrypt_salt_rounds),
+    );
+  }
+  next();
+});
+
+userSchema.post("updateOne", function (doc, next) {
+  delete doc.password;
+  next();
+});
+
+userSchema.methods.toJSON = function () {
+  const user = this.toObject();
+  delete user.password;
+  return user;
+};
 userSchema.statics.isUserExists = async function (userId: number) {
   const existingUser = await UserModel.findOne({ userId });
   return existingUser;
