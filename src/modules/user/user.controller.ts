@@ -97,17 +97,12 @@ const updateUser = async (req: Request, res: Response) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const result = await UserServices.updateUserDB(validationZod, updatedUser);
 
-    const dynamicResponse: Record<string, unknown> = {
-      success: true,
-      message: "User updated successfully",
-    };
+    const dynamicResponse: Record<string, unknown> = {};
     Object.keys(updatedUser).forEach((key) => {
       if (key !== "password") {
         dynamicResponse[key] = updatedUser[key];
       }
     });
-
-    console.log(dynamicResponse);
 
     return res.status(200).json({
       success: true,
