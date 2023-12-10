@@ -26,17 +26,18 @@ const getAllUser = async (req: Request, res: Response) => {
   try {
     const result = await UserServices.getAllUserDB();
 
-    if (result.length === 0) {
-      res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-    }
     res.status(200).json({
       success: true,
       message: "Users are retrieved successfully",
       data: result,
     });
+
+    // if (result.length === 0) {
+    //   res.status(404).json({
+    //     success: false,
+    //     message: "User not found",
+    //   });
+    // }
   } catch (error) {
     res.status(500).json({
       success: false,
