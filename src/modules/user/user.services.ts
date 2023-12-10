@@ -11,20 +11,43 @@ const createUserDB = async (user: IUser) => {
     const validationZod = userValidationSchema.parse(user);
 
     const result = await UserModel.create(validationZod);
-    return result;
+    // Transform the Mongoose document to a plain JavaScript object
+    const userObject = result.toObject();
+
+    // Exclude _id fields within nested objects
+    userObject.fullName = {
+      firstName: userObject.fullName.firstName,
+      lastName: userObject.fullName.lastName,
+    };
+    userObject.address = {
+      street: userObject.address.street,
+      city: userObject.address.city,
+      country: userObject.address.country,
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { _id, __v, password, ...userWithoutIdAndVersion } = userObject;
+
+    return userWithoutIdAndVersion;
   } catch (error) {
     throw new Error(`Error creating user: ${error.message}`);
   }
 };
 
 const getAllUserDB = async () => {
-  const result = await UserModel.find();
+  const result = await UserModel.find().select(
+    "-_id username fullName.firstName fullName.lastName age email address.street address.city address.country",
+  );
+
+  console.log(result);
 
   return result;
 };
 
 const getSingleUserDB = async (userId: number) => {
-  const result = await UserModel.findOne({ userId });
+  const result = await UserModel.findOne({ userId }).select(
+    "-_id userId username fullName.firstName fullName.lastName age email isActive hobbies address.street address.city address.country",
+  );
 
   return result;
 };
@@ -47,7 +70,7 @@ const updateUserDB = async (userId: number, updatedUser: Partial<IUser>) => {
 
     return result;
   } catch (error) {
-    throw new Error(`Error creating user: ${error.message}`);
+    throw new Error(`Error updating user: ${error.message}`);
   }
 };
 

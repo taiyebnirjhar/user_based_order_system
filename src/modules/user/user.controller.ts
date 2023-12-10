@@ -8,13 +8,13 @@ const createUser = async (req: Request, res: Response) => {
 
     const result = await UserServices.createUserDB(user);
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "user is created successfully",
       data: result,
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Error creating user",
       error: error.message,
@@ -26,20 +26,24 @@ const getAllUser = async (req: Request, res: Response) => {
   try {
     const result = await UserServices.getAllUserDB();
 
-    res.status(200).json({
+    if (result && result.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+        error: {
+          code: 404,
+          description: "User not found!",
+        },
+      });
+    }
+
+    return res.status(200).json({
       success: true,
-      message: "Users are retrieved successfully",
+      message: "Users fetched successfully!",
       data: result,
     });
-
-    // if (result.length === 0) {
-    //   res.status(404).json({
-    //     success: false,
-    //     message: "User not found",
-    //   });
-    // }
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Error getting user",
       error: error.message,
@@ -58,19 +62,23 @@ const getSingleUser = async (req: Request, res: Response) => {
     const result = await UserServices.getSingleUserDB(validationZod);
 
     if (!result) {
-      res.status(404).json({
+      return res.status(404).json({
         success: false,
         message: "User not found",
+        error: {
+          code: 404,
+          description: "User not found!",
+        },
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      message: "User is retrieved successfully",
+      message: "Users fetched successfully!",
       data: result,
     });
   } catch (error) {
-    res.status(404).json({
+    return res.status(404).json({
       success: false,
       message: "Error getting user",
       error: error.errors || error.message,
@@ -99,13 +107,25 @@ const updateUser = async (req: Request, res: Response) => {
       }
     });
 
-    res.status(200).json({
+    console.log(dynamicResponse);
+
+    return res.status(200).json({
       success: true,
       message: "User is updated successfully",
       data: dynamicResponse,
     });
   } catch (error) {
-    res.status(500).json({
+    if (error.message === "User not found") {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+        error: {
+          code: 404,
+          description: "User not found!",
+        },
+      });
+    }
+    return res.status(500).json({
       success: false,
       message: error.message || "something went wrong",
       error: error,
@@ -122,19 +142,30 @@ const deleteUser = async (req: Request, res: Response) => {
     const result = await UserServices.deleteUserDB(numericUserId);
 
     if (result.deletedCount === 0) {
-      res.status(404).json({
+      return res.status(404).json({
         success: false,
         message: "User not found",
+        error: 404,
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "user is deleted successfully",
       data: result,
     });
   } catch (error) {
-    res.status(500).json({
+    if (error.message === "User not found") {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+        error: {
+          code: 404,
+          description: "User not found!",
+        },
+      });
+    }
+    return res.status(500).json({
       success: false,
       message: error.message || "something went wrong",
       error: error,
@@ -148,13 +179,13 @@ const createOrder = async (req: Request, res: Response) => {
 
     const result = await UserServices.createOrderDB(orderData);
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Order created successfully!",
       data: result,
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Error creating Order !",
       error: error.message,

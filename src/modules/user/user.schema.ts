@@ -47,6 +47,7 @@ const userSchema = new Schema<IUser, ExtendedUserModel>({
   password: {
     type: String,
     required: [true, "Password is required."],
+    select: false,
   },
   fullName: fullNameSchema,
   age: {
@@ -85,7 +86,7 @@ userSchema.pre("save", async function (next) {
 
 userSchema.post("save", function (doc, next) {
   doc.password = "";
-  delete doc.password;
+  // delete doc.password;
 
   next();
 });
